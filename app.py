@@ -12,8 +12,8 @@ modalidad = st.multiselect("Modalidad", ["Virtual","Presencial","Híbrido"], ["V
 idioma = st.selectbox("Idioma", ["Español","Inglés"])
 
 if st.button("🎯 Recomendar"):
-    rutas = pd.read_csv("data/rutas.csv")
-    cursos = pd.read_csv("data/cursos.csv")
+    rutas = pd.read_csv("rutas.csv")
+    cursos = pd.read_csv("cursos.csv")
     top3 = recommend(rutas, cursos, horas, modalidad, idioma)
     if top3.empty:
         st.warning("No hay coincidencias, prueba otros filtros")
