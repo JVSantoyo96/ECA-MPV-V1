@@ -1,0 +1,21 @@
+ruta_id,nombre,descripcion,dificultad,duracion_meses,precio_usd,modalidad,idioma,nivel,ies
+R001,Fundamentos de Data,Bases de Python y SQL,5,6,500,Virtual,Español,Básico,Universidad X
+R002,IA aplicada a negocios,Machine learning práctico,7,9,1200,Híbrido,Inglés,Intermedio,Universidad Y
+R003,Ciberseguridad básica,Protege redes y sistemas,4,5,800,Virtual,Español,Básico,Universidad Z
+R004,Transformación digital,Cultura y liderazgo digital,6,8,1500,Híbrido,Inglés,Avanzado,Universidad Y
+R005,Marketing digital,SEO y redes sociales,5,6,600,Virtual,Español,Intermedio,Universidad Z
+R006,Big Data,Análisis masivo de datos,7,10,2000,Presencial,Inglés,Avanzado,Universidad X
+R007,DevOps,Automatización y CI/CD,6,7,1300,Híbrido,Inglés,Intermedio,Universidad Y
+R008,Blockchain,Contratos inteligentes,8,10,1800,Virtual,Español,Avanzado,Universidad X
+R009,UX/UI Design,Diseño de experiencia de usuario,5,6,700,Virtual,Español,Intermedio,Universidad Z
+R010,Liderazgo,Gestión de equipos y liderazgo,4,4,900,Virtual,Español,Básico,Universidad X
+R011,Gestión de proyectos,PMP y metodologías ágiles,6,9,1400,Híbrido,Inglés,Intermedio,Universidad Y
+R012,Análisis financiero,Presupuestos y ROI,5,6,900,Virtual,Español,Intermedio,Universidad Z
+R013,Realidad aumentada,Aplicaciones inmersivas,7,8,1600,Presencial,Inglés,Avanzado,Universidad X
+R014,Sostenibilidad,Gestión de proyectos verdes,5,6,800,Virtual,Español,Básico,Universidad Z
+R015,Negocios internacionales,Comercio global,6,7,1200,Híbrido,Inglés,Intermedio,Universidad Y
+R016,Robótica,Programación de robots,8,12,2200,Presencial,Español,Avanzado,Universidad X
+R017,Cloud Computing,Arquitectura en la nube,7,8,1400,Híbrido,Inglés,Intermedio,Universidad Y
+R018,Transformación cultural,Cambio organizacional,5,5,1000,Virtual,Español,Intermedio,Universidad Z
+R019,Inteligencia de negocios,KPIs y dashboards,6,9,1300,Virtual,Español,Intermedio,Universidad X
+R020,Ciberseguridad avanzada,Pentesting y forense,9,12,2500,Presencial,Inglés,Avanzado,Universidad Y

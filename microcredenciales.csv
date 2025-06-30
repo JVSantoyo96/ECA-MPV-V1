@@ -1,0 +1,29 @@
+microcred_id,nombre,trayectoria_id,nivel,curso_ids
+MC001,Multidisciplinar - MC001,Multidisciplinar,Avanzado,C001|C098|C090|C015|C072
+MC002,Multidisciplinar - MC002,Multidisciplinar,Avanzado,C039|C081|C018
+MC003,Multidisciplinar - MC003,Multidisciplinar,Avanzado,C099|C095|C087|C017
+MC004,Multidisciplinar - MC004,Multidisciplinar,Básico,C076|C100|C023|C083
+MC005,Multidisciplinar - MC005,Multidisciplinar,Intermedio,C063|C079|C089|C056
+MC006,Sostenibilidad - MC006,Sostenibilidad,Básico,C002|C027|C046
+MC007,Sostenibilidad - MC007,Sostenibilidad,Intermedio,C007|C031|C080
+MC008,Sostenibilidad - MC008,Sostenibilidad,Intermedio,C014|C059|C070
+MC009,Sostenibilidad - MC009,Sostenibilidad,Básico,C084|C012|C037|C094|C022
+MC010,Sostenibilidad - MC010,Sostenibilidad,Avanzado,C050|C030|C044|C061
+MC011,Sostenibilidad - MC011,Sostenibilidad,Básico,C029
+MC012,Data/AI - MC012,Data/AI,Básico,C068|C074|C003
+MC013,Data/AI - MC013,Data/AI,Intermedio,C091|C049|C062
+MC014,Data/AI - MC014,Data/AI,Básico,C024|C006|C092
+MC015,Data/AI - MC015,Data/AI,Intermedio,C043|C057|C073
+MC016,Data/AI - MC016,Data/AI,Básico,C034|C051
+MC017,Ciberseguridad - MC017,Ciberseguridad,Intermedio,C004|C005|C028
+MC018,Ciberseguridad - MC018,Ciberseguridad,Avanzado,C085|C071|C060|C041|C054
+MC019,Ciberseguridad - MC019,Ciberseguridad,Básico,C011|C096|C025|C036|C055
+MC020,Ciberseguridad - MC020,Ciberseguridad,Intermedio,C066|C019|C033
+MC021,Creatividad e Innovación - MC021,Creatividad e Innovación,Básico,C008|C009|C040|C021
+MC022,Creatividad e Innovación - MC022,Creatividad e Innovación,Avanzado,C013|C069|C088|C086
+MC023,Creatividad e Innovación - MC023,Creatividad e Innovación,Básico,C052|C010|C042|C093|C020
+MC024,Creatividad e Innovación - MC024,Creatividad e Innovación,Básico,C067|C035|C047
+MC025,Creatividad e Innovación - MC025,Creatividad e Innovación,Básico,C082|C032
+MC026,Innovación Social - MC026,Innovación Social,Básico,C078|C075|C016|C065|C053
+MC027,Innovación Social - MC027,Innovación Social,Avanzado,C038|C026|C097|C048|C064
+MC028,Innovación Social - MC028,Innovación Social,Básico,C077|C045|C058
