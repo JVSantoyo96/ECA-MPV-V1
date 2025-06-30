@@ -7,6 +7,7 @@ def recomendar(
         horas: int,
         modalidad: list[str],
         idioma: str,
+        **kwargs,
 ) -> pd.DataFrame:
     """
     Filtra y puntúa rutas, devuelve TOP-3 DataFrame.
