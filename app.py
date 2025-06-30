@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from recommender import recomend
+from recommender import recommend
 
 st.set_page_config(page_title="MVP ECA", layout="centered")
 st.title("🧭 Tu ruta ideal")
