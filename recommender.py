@@ -55,6 +55,7 @@ def recomendar(
         ruta_formativa = cursos_ruta.to_dict("records") if not cursos_ruta.empty else []
 
         out.append({
+            "ruta_id"        : fila["ruta_id"],
             "nombre"          : fila["nombre"],
             "descripcion"     : fila["descripcion"],
             "duracion_meses"  : int(fila["duracion_meses"]),
