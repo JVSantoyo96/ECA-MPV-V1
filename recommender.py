@@ -3,6 +3,7 @@ import pandas as pd
 def recomendar(
         rutas: pd.DataFrame,
         cursos: pd.DataFrame,
+        *,
         horas: int,
         modalidad: list[str],
         idioma: str,
