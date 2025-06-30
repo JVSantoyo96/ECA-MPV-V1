@@ -1,6 +1,6 @@
 import pandas as pd
 
-def recommend(rutas, cursos, horas, modalidad, idioma):
+def recomendar(rutas, cursos, horas, modalidad, idioma):
     df = rutas.copy()
     df = df[df["duracion_meses"] <= horas * 4]          # filtro simple horas → meses
     df = df[df["modalidad"].isin(modalidad)]
