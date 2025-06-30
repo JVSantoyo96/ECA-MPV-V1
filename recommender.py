@@ -1,139 +1,67 @@
-import streamlit as st
 import pandas as pd
-from recommender import recomendar
 
-st.set_page_config(page_title="MVP ECA", page_icon="🧭", layout="centered")
+def recomendar(
+        rutas: pd.DataFrame,
+        cursos: pd.DataFrame,
+        *,
+        horas: int,
+        modalidad: list[str],
+        idioma: str,
+        **kwargs,
+) -> pd.DataFrame:
+    """
+    Filtra y puntúa rutas, devuelve TOP-3 DataFrame.
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🎨 — Estilos globales (paleta neutra + rojo acento) y tamaño de fuente
-# ────────────────────────────────────────────────────────────────────────────────
-CUSTOM_CSS = """
-<style>
-/* Fuentes + sliders rojos */
-:root {
-  --primary-color: #E63946;   /* rojo acento */
-  --text-color: #1d3557;      /* azul oscuro */
-}
-html, body, [class*="css"]  {
-  font-family: 'Inter', sans-serif;
-  color: var(--text-color);
-}
-[data-testid="stSlider"] span[data-baseweb="slider"] {
-  color: var(--primary-color) !important;
-}
-/* Botón principal */
-div.stButton > button:first-child {
-  background‑color: white;
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
-  border-radius: 8px;
-  font-weight: 600;
-}
-/* Tarjeta recomendación */
-.card {
-  border: 1px solid #E5E7EB;
-  border-radius: 12px;
-  padding: 1.2rem;
-  margin-bottom: 1rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,.04);
-}
-</style>
-"""
+    • horas: disponibles por semana
+    • modalidad: lista de strings (puede venir vacía)
+    • idioma: string único
+    """
+    df = rutas.copy()
 
-st.markdown(CUSTOM_CSS, unsafe_allow_html=True)
+    # --- FILTROS DUROS ----------------------------------------------------
+    # 1. duración (regla simplona: 4h/sem = 1 mes de estudio)
+    df = df[df["duracion_meses"] <= max(horas, 1) * 4]
 
-# ────────────────────────────────────────────────────────────────────────────────
-# 🧭 Cabecera
-# ────────────────────────────────────────────────────────────────────────────────
-st.title("🧭 Tu ruta ideal")
-st.markdown("→ **Ajusta filtros y presiona _Recomendar_**")
+    # 2. modalidad
+    if modalidad:                                              # <- evita vacío
+        df = df[df["modalidad"].str.lower().isin(
+            [m.lower() for m in modalidad]
+        )]
 
-# Contenedor para barra de progreso
-progress_bar = st.progress(0)
-step = 100 // 12  # 12 preguntas
+    # 3. idioma
+    if idioma:
+        df = df[df["idioma"].str.lower() == idioma.lower()]
 
-answers = {}
+    # Si tras los filtros no queda nada, salimos ya:
+    if df.empty:
+        return pd.DataFrame()                                  # <- señal vacío
 
-# ────────────────────────────────────────────────────────────────────────────────
-# Preguntas gamificadas (12)
-# ────────────────────────────────────────────────────────────────────────────────
-col1, col2 = st.columns(2)
-with col1:
-    answers["objetivo"] = st.radio(
-        "🚀 Imagina tu meta final… ¿qué emblema te gustaría desbloquear?",
-        ["Primer empleo", "Reskilling", "Upskilling", "Emprender"])
-progress_bar.progress(step)
+    # --- PUNTAJE ----------------------------------------------------------
+    # Normalizamos para que “más pequeño = mejor”
+    df["score_precio"]     = df["precio_usd"].rank(method="min")
+    df["score_dificultad"] = df["dificultad"].rank(method="min")
 
-answers["intereses"] = st.multiselect(
-    "🎯 Elige hasta **2** reinos de conocimiento donde quieras brillar:",
-    ["Multidisciplinar", "Data/AI", "Ciberseguridad", "Innovación Social", "Diseño", "Negocios"],
-    max_selections=2)
-progress_bar.progress(step*2)
+    # Ponderación simple (50 % precio, 50 % dificultad)
+    df["puntaje"] = df["score_precio"] * 0.5 + df["score_dificultad"] * 0.5
 
-answers["experiencia"] = st.slider("🏆 ¿Qué tan lejos has viajado en esos reinos? (0 km = novato, 100 km = experto)", 0, 100, 50)
-progress_bar.progress(step*3)
+    # --- TOP-3 ------------------------------------------------------------
+    top3 = df.nsmallest(3, "puntaje")
 
-answers["horas"] = st.slider("⏰ ¿Cuántas horas semanales puedes dedicar?", 1, 20, 5)
-progress_bar.progress(step*4)
+    # (Opcional) añadimos cursos dentro de la misma función
+    out = []
+    for _, fila in top3.iterrows():
+        cursos_ruta = cursos[cursos["ruta_id"] == fila["ruta_id"]]
 
-answers["ritmo"] = st.radio(
-    "📅 Marca tu ritmo preferido de misiones:",
-    ["Sprint intensivo (≤ 3 meses)", "Constante (3‑6 meses)", "Tranquilo (6‑12 meses)"])
-progress_bar.progress(step*5)
+        ruta_formativa = cursos_ruta.to_dict("records") if not cursos_ruta.empty else []
 
-answers["modalidad"] = st.multiselect("🏠 ¿En qué modalidad te sientes más cómodo para aprender?", ["Virtual", "Presencial", "Híbrido"], ["Virtual"])
-progress_bar.progress(step*6)
+        out.append({
+            "nombre"          : fila["nombre"],
+            "descripcion"     : fila["descripcion"],
+            "duracion_meses"  : int(fila["duracion_meses"]),
+            "precio_usd"      : int(fila["precio_usd"]),
+            "ies"             : fila["ies"],
+            "puntaje"         : float(fila["puntaje"]),
+            "ruta_formativa"  : ruta_formativa,
+        })
 
-answers["presupuesto"] = st.number_input("💰 Tu bolsa de oro para esta campaña (USD máx):", 0, 20000, 1000, step=100)
-progress_bar.progress(step*7)
-
-answers["geo"] = st.radio("📍 ¿Tienes limitación geográfica?", ["Sin límite", "Quiero estudiar en mi ciudad"])
-progress_bar.progress(step*8)
-
-answers["idiomas"] = st.multiselect("🗣️ Idiomas en los que disfrutas aprender:", ["Español", "Inglés", "Francés", "Portugués"], ["Español"])
-progress_bar.progress(step*9)
-
-answers["estilo"] = st.multiselect("🎮 Elige tu estilo de juego de aprendizaje:", ["Videos y podcasts", "Lecturas y proyectos escritos", "Talleres colaborativos"])
-progress_bar.progress(step*10)
-
-answers["docs"] = st.file_uploader("📄 ¿Te gustaría subir tu CV o notas?", type=["pdf", "doc", "docx"], accept_multiple_files=False)
-progress_bar.progress(step*11)
-
-answers["habito"] = st.text_input("🌟 ¿Cuál super‑hábito te gustaría cultivar?")
-progress_bar.progress(100)
-
-# ────────────────────────────────────────────────────────────────────────────────
-# Acción principal – Recomendar
-# ────────────────────────────────────────────────────────────────────────────────
-if st.button("🎯 Recomendar"):
-    # Carga datasets
-    rutas = pd.read_csv("rutas.csv")
-    cursos = pd.read_csv("cursos.csv")
-
-    # Llamada al core (solo las variables que entiende la función v0)
-    filtros = {
-        "horas": answers["horas"],
-        "modalidad": answers["modalidad"],
-        "idioma": answers["idiomas"][0] if answers["idiomas"] else "Español",
-    }
-    recomendaciones = recomendar(rutas, cursos, **filtros)
-
-    if recomendaciones.empty:
-        st.warning("⚠️ No hay coincidencias, prueba otros filtros.")
-    else:
-        st.success("✨ ¡Listo! Estas son tus rutas recomendadas:")
-        for idx, row in recomendaciones.iterrows():
-            top_tag = "⭐ Mejor coincidencia" if idx == 0 else f"Opción {idx+1}"
-            with st.container():
-                st.markdown(f"<div class='card'><h3>{top_tag}: {row['nombre']}</h3>", unsafe_allow_html=True)
-                st.write(f"**Institución:** {row['ies']}")
-                st.write(f"**Descripción:** {row['descripcion']}")
-                st.write(f"**Duración:** {int(row['duracion_meses'])} meses · **Precio:** USD {int(row['precio_usd']):,}")
-
-                # Lista de cursos
-                cursos_ruta = cursos[cursos['ruta_id'] == row['ruta_id']]
-                if not cursos_ruta.empty:
-                    with st.expander("▶ Ver micro‑cursos"):
-                        for _, c in cursos_ruta.iterrows():
-                            st.markdown(f"- **{c['curso_nombre']}** ({c['duracion_horas']} h) — _{c['microcredencial_nombre']}_")
-                st.markdown("</div>", unsafe_allow_html=True)
+    return pd.DataFrame(out)
