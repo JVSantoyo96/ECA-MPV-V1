@@ -23,11 +23,19 @@ html, body, [class*="css"]  {
 }
 /* Botón principal */
 div.stButton > button:first-child {
-  background‑color: white;
-  color: var(--primary-color);
-  border: 2px solid var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
   border-radius: 8px;
   font-weight: 600;
+  font-size: 1.25rem;
+  padding: 0.75rem 1.5rem;
+  box-shadow: 0 0 0.25rem rgba(0,0,0,.2);
+  transition: transform 0.1s ease-in-out;
+}
+div.stButton > button:first-child:hover {
+  transform: scale(1.05);
+  cursor: pointer;
 }
 /* Tarjeta recomendación */
 .card {
