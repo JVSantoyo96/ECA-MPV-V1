@@ -8,7 +8,7 @@ def recomendar(
         modalidad: list[str],
         idioma: str,
         **kwargs,
-) -> pd.DataFrame:
+    ) -> pd.DataFrame:
     """
     Filtra y puntúa rutas, devuelve TOP-3 DataFrame.
 
