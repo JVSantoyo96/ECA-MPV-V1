@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def recomendar(
         rutas: pd.DataFrame,
@@ -7,6 +8,7 @@ def recomendar(
         horas: int,
         modalidad: list[str],
         idioma: str,
+        exp: int
         **kwargs,
     ) -> pd.DataFrame:
     """
@@ -36,13 +38,25 @@ def recomendar(
     if df.empty:
         return pd.DataFrame()                                  # <- señal vacío
 
-    # --- PUNTAJE ----------------------------------------------------------
-    # Normalizamos para que “más pequeño = mejor”
-    df["score_precio"]     = df["precio_usd"].rank(method="min")
-    df["score_dificultad"] = df["dificultad"].rank(method="min")
 
-    # Ponderación simple (50 % precio, 50 % dificultad)
-    df["puntaje"] = df["score_precio"] * 0.5 + df["score_dificultad"] * 0.5
+    # --- PUNTAJE  ----------------------------------------------------------
+    df["score_precio"]      = df["precio_usd"].rank(method="min", ascending=True)
+    df["score_dificultad"]  = df["dificultad"].rank(method="min")                # menor = mejor
+    df["score_modalidad"]   = (~df["modalidad"].str.lower().isin(
+                                [m.lower() for m in modalidad]
+                            )).astype(int)                                     # 0 si match, 1 si no
+    df["score_gap_exp"]     = (df["dificultad"] - exp).abs()                    # gap con la experiencia
+    df["random_noise"]      = np.random.uniform(0, 0.1, len(df))
+
+    # mezcla de señales (ajusta pesos a tu gusto)
+    df["puntaje"] = (
+        df["score_precio"]      * 0.30 +   # más barato mejor
+        df["score_dificultad"]  * 0.25 +   # menos difícil mejor
+        df["score_modalidad"]   * 0.25 +   # penaliza modalidad inadecuada
+        df["score_gap_exp"]     * 0.15 +   # penaliza gap grande
+        df["random_noise"]                 # rompe empates
+    )
+    
 
     # --- TOP-3 ------------------------------------------------------------
     top3 = df.nsmallest(3, "puntaje")
