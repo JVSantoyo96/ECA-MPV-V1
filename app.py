@@ -28,6 +28,14 @@ div.stButton > button:first-child {
   border: 2px solid var(--primary-color);
   border-radius: 8px;
   font-weight: 600;
+    font-size: 1.2rem;
+  padding: 0.6rem 1.4rem;
+  box-shadow: 0 0 0 3px rgba(230,57,70,0.15);
+  transition: background-color 0.2s, color 0.2s;
+}
+div.stButton > button:first-child:hover {
+  background-color: var(--primary-color);
+  color: white;
 }
 /* Tarjeta recomendación */
 .card {
