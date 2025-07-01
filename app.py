@@ -115,7 +115,7 @@ if st.button("🎯 Recomendar"):
         "horas": answers["horas"],
         "modalidad": answers["modalidad"],
         "idioma": answers["idiomas"][0] if answers["idiomas"] else "Español",
-        "exp": experiencia     # <- ya la tienes del slider 0-100
+        "exp": answers["experiencia"]          # <- ya la tienes del slider 0-100
     }
     recomendaciones = recomendar(rutas, cursos, **filtros)
 
