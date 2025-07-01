@@ -11,7 +11,7 @@ def recomendar(
         exp: int,
         **kwargs
     ) -> pd.DataFrame:
-    top3 = recomendar(rutas, cursos, **filtros)
+ 
     """
     Filtra y puntúa rutas, devuelve TOP-3 DataFrame.
 
