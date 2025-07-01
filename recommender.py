@@ -8,7 +8,7 @@ def recomendar(
         horas: int,
         modalidad: list[str],
         idioma: str,
-        exp: int
+        exp: int,
         **kwargs,
     ) -> pd.DataFrame:
     """
