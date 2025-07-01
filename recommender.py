@@ -9,8 +9,9 @@ def recomendar(
         modalidad: list[str],
         idioma: str,
         exp: int,
-        **kwargs,
+        **kwargs
     ) -> pd.DataFrame:
+    top3 = recomendar(rutas, cursos, **filtros)
     """
     Filtra y puntúa rutas, devuelve TOP-3 DataFrame.
 
