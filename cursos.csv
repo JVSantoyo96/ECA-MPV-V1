@@ -24,3 +24,28 @@ R005,C022,Contabilidad Básica,16,M022,Gestión Contable
 R005,C023,Análisis de Costos,12,M023,Optimización Financiera
 R005,C024,Finanzas Corporativas,18,M024,Estrategias Financieras
 R005,C025,Inversiones,20,M025,Gestión de Portafolios
+R006,C026,Fundamentos de Python,2,M001,Introducción a la Programación
+R006,C027,SQL Básico,5,M002,Fundamentos de Bases de Datos
+R006,C028,Estadística Básica,8,M003,Fundamentos de Análisis
+R006,C029,Visualización de Datos,2,M004,Presentación de Datos
+R006,C030,Machine Learning Inicial,2,M005,IA Aplicada
+R007,C031,Redes de Computadoras,6,M006,Fundamentos de Redes
+R007,C032,Sistemas Operativos,8,M007,Infraestructura de TI
+R007,C033,Ciberseguridad Básica,4,M008,Protección de la Información
+R007,C034,Criptografía,2,M009,Seguridad Avanzada
+R007,C035,Cloud Computing,2,M010,Fundamentos de la Nube
+R008,C036,Marketing Digital,6,M011,Estrategias Digitales
+R008,C037,SEO y SEM,4,M012,Optimización Web
+R008,C038,Redes Sociales,1,M013,Gestión de Audiencias
+R008,C039,Branding,2,M014,Gestión de Marca
+R008,C040,Content Marketing,5,M015,Estrategias de Contenido
+R009,C041,Gestión de Proyectos,8,M016,Metodologías Ágiles
+R009,C042,Kanban,4,M017,Optimización de Flujos
+R009,C043,Liderazgo de Equipos,2,M018,Habilidades de Liderazgo
+R009,C044,Soft Skills,1,M019,Habilidades Profesionales
+R009,C045,Comunicación Efectiva,8,M020,Competencias Comunicativas
+R010,C046,Fundamentos Financieros,4,M021,Planeación Financiera
+R010,C047,Contabilidad Básica,6,M022,Gestión Contable
+R010,C048,Análisis de Costos,2,M023,Optimización Financiera
+R010,C049,Finanzas Corporativas,8,M024,Estrategias Financieras
+R010,C050,Inversiones,2,M025,Gestión de Portafolios
