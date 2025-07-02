@@ -1,83 +1,74 @@
 import pandas as pd
 import numpy as np
 
-def recomendar(
-        rutas: pd.DataFrame,
-        cursos: pd.DataFrame,
-        *,
-        horas: int,
-        modalidad: list[str],
-        idioma: str,
-        exp: int,
-        **kwargs
-    ) -> pd.DataFrame:
- 
-    """
-    Filtra y puntúa rutas, devuelve TOP-3 DataFrame.
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import MinMaxScaler
 
-    • horas: disponibles por semana
-    • modalidad: lista de strings (puede venir vacía)
-    • idioma: string único
-    """
-    df = rutas.copy()
+class Recommender:
+    def __init__(self, rutas, cursos):
+        self.rutas = rutas
+        self.cursos = cursos
 
-    # --- FILTROS DUROS ----------------------------------------------------
-    # 1. duración (regla simplona: 4h/sem = 1 mes de estudio)
-    df = df[df["duracion_meses"] <= max(horas, 1) * 4]
+    def recomendar(self, respuestas):
 
-    # 2. modalidad
-    if modalidad:                                              # <- evita vacío
-        df = df[df["modalidad"].str.lower().isin(
-            [m.lower() for m in modalidad]
-        )]
+        # 1. FILTROS DUROS con fallback
+        rutas = self.rutas.copy()
+        filtradas = rutas[
+            (rutas["precio_usd"] <= respuestas["presupuesto"]) &
+            (rutas["modalidad"].apply(lambda m: any(mod in m for mod in respuestas["modalidad"]))) &
+            (rutas["idioma"].apply(lambda i: any(idi in i for idi in respuestas["idiomas"])))
+        ]
+        # Si hay al menos 3 rutas que cumplen filtros, úsalas;
+        # de lo contrario, volvemos al catálogo completo
+        if len(filtradas) >= 3:
+            rutas = filtradas.copy()
+        else:
+            rutas = self.rutas.copy()
+        # 2. VECTORIZACIÓN DE SEÑALES
+        temas = ["Multidisciplinar","Data/AI","Ciberseguridad","Innovación Social","Diseño","Negocios"]
+        user_tematica = np.array([[1 if t in respuestas["intereses"] else 0 for t in temas]])
+        ruta_tematica = np.array(
+            rutas["tematica"].astype(str)
+             .apply(lambda txt: [1 if t in txt else 0 for t in temas])
+             .to_list()
+        )
 
-    # 3. idioma
-    if idioma:
-        df = df[df["idioma"].str.lower() == idioma.lower()]
+        scaler = MinMaxScaler()
+        ruta_diff_norm   = scaler.fit_transform(rutas[["dificultad_num"]])
+        user_exp_norm    = scaler.transform([[respuestas["experiencia"]]])
+        ruta_precio_norm = scaler.fit_transform(rutas[["precio_usd"]])
+        user_prec_norm   = scaler.transform([[respuestas["presupuesto"]]])
+        ruta_dur_norm    = scaler.fit_transform(rutas[["duracion_meses"]])
+        user_horas_norm  = scaler.transform([[respuestas["horas"]]])
 
-    # Si tras los filtros no queda nada, salimos ya:
-    if df.empty:
-        return pd.DataFrame()                                  # <- señal vacío
+        # 3. CÁLCULO DE PUNTAJE COMPUESTO
+        sim          = cosine_similarity(user_tematica, ruta_tematica).flatten()
+        score_diff   = 1 - np.abs(user_exp_norm - ruta_diff_norm).flatten()
+        score_price  = 1 - np.abs(user_prec_norm - ruta_precio_norm).flatten()
+        score_horas  = 1 - np.abs(user_horas_norm - ruta_dur_norm).flatten()
 
+        rutas["score"] = (
+            0.5 * sim +
+            0.2 * score_diff +
+            0.2 * score_price +
+            0.1 * score_horas
+        )
 
-    # --- PUNTAJE  ----------------------------------------------------------
-    df["score_precio"]      = df["precio_usd"].rank(method="min", ascending=True)
-    df["score_dificultad"]  = df["dificultad"].rank(method="min")                # menor = mejor
-    df["score_modalidad"]   = (~df["modalidad"].str.lower().isin(
-                                [m.lower() for m in modalidad]
-                            )).astype(int)                                     # 0 si match, 1 si no
-    df["score_gap_exp"]     = (df["dificultad"] - exp).abs()                    # gap con la experiencia
-    df["random_noise"]      = np.random.uniform(0, 0.1, len(df))
+        # 4. DESEMPATE ALEATORIO
+        rng = np.random.default_rng()
+        rutas["score"] += rng.random(len(rutas)) * 1e-4
 
-    # mezcla de señales (ajusta pesos a tu gusto)
-    df["puntaje"] = (
-        df["score_precio"]      * 0.30 +   # más barato mejor
-        df["score_dificultad"]  * 0.25 +   # menos difícil mejor
-        df["score_modalidad"]   * 0.25 +   # penaliza modalidad inadecuada
-        df["score_gap_exp"]     * 0.15 +   # penaliza gap grande
-        df["random_noise"]                 # rompe empates
-    )
-    
-
-    # --- TOP-3 ------------------------------------------------------------
-    top3 = df.nsmallest(3, "puntaje")
-
-    # (Opcional) añadimos cursos dentro de la misma función
-    out = []
-    for _, fila in top3.iterrows():
-        cursos_ruta = cursos[cursos["ruta_id"] == fila["ruta_id"]]
-
-        ruta_formativa = cursos_ruta.to_dict("records") if not cursos_ruta.empty else []
-
-        out.append({
-            "ruta_id"        : fila["ruta_id"],
-            "nombre"          : fila["nombre"],
-            "descripcion"     : fila["descripcion"],
-            "duracion_meses"  : int(fila["duracion_meses"]),
-            "precio_usd"      : int(fila["precio_usd"]),
-            "ies"             : fila["ies"],
-            "puntaje"         : float(fila["puntaje"]),
-            "ruta_formativa"  : ruta_formativa,
-        })
-
-    return pd.DataFrame(out)
+        # 5. ORDENAR TODAS LAS RUTAS Y DEVOLVER
+        resultado = []
+        for _, fila in rutas.sort_values("score", ascending=False).iterrows():
+            cursos_ruta = self.cursos[self.cursos["ruta_id"] == fila["ruta_id"]]
+            resultado.append({
+                "ruta":            fila["nombre"],
+                "ies":             fila["ies"],
+                "descripcion":     fila["descripcion"],
+                "duracion_meses":  fila["duracion_meses"],
+                "precio":          fila["precio_usd"],
+                "puntaje":         round(fila["score"], 3),
+                "ruta_formativa":  cursos_ruta.to_dict("records")
+            })
+        return resultado

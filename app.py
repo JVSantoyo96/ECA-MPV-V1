@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from recommender import recomendar
+from recommender import Recommender
 
 st.set_page_config(page_title="MVP ECA", page_icon="🧭", layout="centered")
 
@@ -119,30 +119,48 @@ if st.button("🎯 Recomendar"):
     cursos = pd.read_csv("cursos.csv")
 
     # Llamada al core (solo las variables que entiende la función v0)
+   
     filtros = {
-        "horas": answers["horas"],
-        "modalidad": answers["modalidad"],
-        "idioma": answers["idiomas"][0] if answers["idiomas"] else "Español",
-        "exp": answers["experiencia"]          # <- ya la tienes del slider 0-100
-    }
-    recomendaciones = recomendar(rutas, cursos, **filtros)
+        "intereses":   answers["intereses"],
+        "experiencia": answers["experiencia"],
+        "presupuesto": answers["presupuesto"],
+        "modalidad":   answers["modalidad"] or ["Virtual","Presencial","Híbrido"],
+        "idiomas":     answers["idiomas"]  or ["Español"],
+        "horas":       answers["horas"],        # horas semanales disponibles
+        "estilo":      answers["estilo"] or ["Videos y podcasts", "Lecturas y proyectos escritos", "Talleres colaborativos"],
+        "docs":        answers["docs"],
+        "habito":      answers["habito"]
+      }
 
-    if recomendaciones.empty:
-        st.warning("⚠️ No hay coincidencias, prueba otros filtros.")
+    
+        # 🛠️ Instanciamos y obtenemos la lista de resultados
+
+    rec         = Recommender(rutas, cursos)
+    all_results = rec.recomendar(filtros)     # lista completa ordenada por afinidad
+    resultado   = all_results[:3]             # nos quedamos sólo con las 3 mejores
+
+
+    # Si no hay resultados (lista vacía), mostramos un warning
+    if not resultado:
+        st.warning("No se encontraron rutas que cumplan tu perfil.")
     else:
-        st.success("✨ ¡Listo! Estas son tus rutas recomendadas:")
-        for idx, row in recomendaciones.iterrows():
-            top_tag = "⭐ Mejor coincidencia" if idx == 0 else f"Opción {idx+1}"
-            with st.container():
-                st.markdown(f"<div class='card'><h3>{top_tag}: {row['nombre']}</h3>", unsafe_allow_html=True)
-                st.write(f"**Institución:** {row['ies']}")
-                st.write(f"**Descripción:** {row['descripcion']}")
-                st.write(f"**Duración:** {int(row['duracion_meses'])} meses · **Precio:** USD {int(row['precio_usd']):,}")
+        # Aquí va tu código de renderizado original,
+        # pero usando la lista `resultado`
+        for ruta in resultado:
+            st.subheader(ruta["ruta"])
+            st.write(f"**IES:** {ruta['ies']}")
+            st.write(f"**Precio:** {ruta['precio']} USD")
+            st.write(f"**Duración:** {ruta['duracion_meses']} meses")
+            st.write(f"**Puntaje:** {ruta['puntaje']}") 
+             
+            # — Aquí abrimos un expander para listar los cursos —
+            cursos_ruta = ruta["ruta_formativa"]
+            if cursos_ruta:
+                with st.expander("👉 Ver cursos de esta ruta"):
+                    for curso in cursos_ruta:
+                        st.write(
+                            f"- **{curso['curso_nombre']}** "
+                            f"({curso['duracion_horas']} h) – "
+                            f"{curso['microcredencial_nombre']}"
+                        )                                            
 
-                # Lista de cursos
-                cursos_ruta = cursos[cursos['ruta_id'] == row['ruta_id']]
-                if not cursos_ruta.empty:
-                    with st.expander("▶ Ver micro‑cursos"):
-                        for _, c in cursos_ruta.iterrows():
-                            st.markdown(f"- **{c['curso_nombre']}** ({c['duracion_horas']} h) — _{c['microcredencial_nombre']}_")
-                st.markdown("</div>", unsafe_allow_html=True)
